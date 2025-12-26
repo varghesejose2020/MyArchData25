@@ -4,102 +4,163 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Archdiocese Changanacherry - Priests</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="https://www.archdiocesechanganacherry.org/images/Arch_Logo.jpeg" type="image/jpeg">
+
   <style>
+    /* Global Styles */
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
       margin: 0;
-      padding: 20px;
-      background-color: #f4f4f4;
+      padding: 0;
+      background-color: #f8f9fa;
+      color: #333;
+      line-height: 1.6;
     }
 
     h1, h2 {
       text-align: center;
+      font-weight: 600;
+      color: #222;
     }
 
+    h1 {
+      margin-top: 20px;
+      font-size: 2.5em;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 1.8em;
+    }
+
+    /* Logo */
+    #logo-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    #logo-container img {
+      width: 120px;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Search Bar */
     #search-bar {
-      width: 100%;
-      padding: 10px;
-      margin: 20px 0;
-      border: 1px solid #ddd;
-      border-radius: 5px;
+      display: block;
+      width: 90%;
+      max-width: 500px;
+      margin: 30px auto;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 50px;
       font-size: 1em;
+      transition: all 0.3s ease;
     }
 
+    #search-bar:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 8px rgba(0,123,255,0.2);
+      outline: none;
+    }
+
+    /* Priests Grid */
     #priests-list {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
+      gap: 25px;
       list-style-type: none;
-      padding: 0;
+      padding: 0 20px 50px 20px;
+      margin: 0;
     }
 
     .priest-item {
-      background-color: white;
-      border-radius: 5px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      padding: 15px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 20px;
       text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .priest-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
     }
 
     .priest-item img {
       width: 100%;
       height: 220px;
       object-fit: cover;
-      border-radius: 5px;
+      border-radius: 10px;
+      margin-bottom: 15px;
     }
 
     .priest-item h3 {
       margin: 10px 0 5px;
       font-size: 1.3em;
-      color: #333;
+      color: #007bff;
     }
 
     .priest-item p {
       margin: 5px 0;
-      color: #666;
-      font-size: 1em;
+      color: #555;
+      font-size: 0.95em;
     }
 
+    /* Loading */
     #loading-message {
       text-align: center;
-      margin: 40px 0;
+      font-size: 1.2em;
+      margin: 50px 0;
+      color: #555;
     }
 
     /* New Priests Button */
     #new-priests-button {
       position: fixed;
-      top: 20px;
-      right: 20px;
+      top: 25px;
+      right: 25px;
       background-color: #007bff;
-      color: white;
+      color: #fff;
       border: none;
       border-radius: 50px;
       padding: 12px 20px;
       font-size: 1em;
       cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       display: flex;
       align-items: center;
       gap: 10px;
+      box-shadow: 0 6px 16px rgba(0,123,255,0.3);
+      transition: all 0.3s ease;
       z-index: 1100;
+    }
+
+    #new-priests-button:hover {
+      background-color: #0056b3;
+      box-shadow: 0 8px 20px rgba(0,123,255,0.4);
     }
 
     #new-priests-count {
       background-color: #ff4136;
       border-radius: 50%;
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       display: flex;
       justify-content: center;
       align-items: center;
       font-weight: bold;
-      font-size: 0.9em;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      font-size: 0.95em;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
 
     /* Modal Styles */
     .modal {
-      display: none; /* Hidden by default */
+      display: none;
       position: fixed;
       z-index: 1000;
       left: 0;
@@ -108,18 +169,25 @@
       height: 100%;
       overflow: auto;
       background-color: rgba(0,0,0,0.6);
+      backdrop-filter: blur(2px);
     }
 
     .modal-content {
       background-color: #fff;
       margin: 5% auto;
-      padding: 20px;
-      border-radius: 10px;
+      padding: 25px;
+      border-radius: 15px;
       width: 90%;
       max-width: 1000px;
       max-height: 80vh;
       overflow-y: auto;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .close-button {
@@ -128,10 +196,11 @@
       font-size: 28px;
       font-weight: bold;
       cursor: pointer;
+      transition: color 0.2s ease;
     }
 
     .close-button:hover {
-      color: black;
+      color: #000;
     }
 
     #new-priests-list {
@@ -140,49 +209,68 @@
       gap: 20px;
       list-style-type: none;
       padding: 0;
-      margin: 0;
+      margin: 20px 0 0 0;
     }
 
     #new-priests-list li {
-      background-color: #fafafa;
-      border-radius: 5px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      padding: 10px;
+      background-color: #fefefe;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      padding: 15px;
       text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    #new-priests-list li:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.12);
     }
 
     #new-priests-list img {
       width: 100%;
       height: 180px;
       object-fit: cover;
-      border-radius: 5px;
+      border-radius: 8px;
+      margin-bottom: 10px;
     }
 
     #new-priests-list h3 {
       margin: 10px 0 5px;
       font-size: 1.2em;
-      color: #222;
+      color: #007bff;
     }
 
     #new-priests-list p {
       margin: 5px 0;
-      color: #444;
+      color: #555;
       font-size: 0.95em;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      #search-bar {
+        width: 95%;
+      }
     }
   </style>
 </head>
 <body>
 
+  <!-- Logo -->
+  <div id="logo-container">
+    <img src="https://www.archdiocesechanganacherry.org/images/Arch_Logo.jpeg" 
+         alt="Archdiocese Logo">
+  </div>
+
   <h1>Priests of Archdiocese Changanacherry</h1>
 
-  <input
-    type="text"
-    id="search-bar"
-    placeholder="Search for a priest..."
-    oninput="filterPriests()"
-  />
+  <!-- Search -->
+  <input type="text" id="search-bar" placeholder="Search for a priest..." oninput="filterPriests()" />
 
+  <!-- Loading -->
   <div id="loading-message">Loading...</div>
+
+  <!-- Priests Grid -->
   <ul id="priests-list"></ul>
 
   <!-- New Priests Button -->
@@ -214,17 +302,15 @@
     const newPriestsListEl = document.getElementById('new-priests-list');
     const modalCloseBtn = document.getElementById('modal-close');
 
-    // Replace relative photo URLs with full URL if needed
     function fixPhotoUrl(photoUrl) {
       if (!photoUrl) return '';
       if (photoUrl.startsWith('http')) return photoUrl;
-      // Remove leading "./" or any relative prefix
       return photoUrl.replace(/^\.\/?/, 'https://directory.archdiocesechanganacherry.org/');
     }
 
     function displayPriests(priests) {
       priestListEl.innerHTML = '';
-      if (priests.length === 0) {
+      if (!priests.length) {
         priestListEl.innerHTML = '<p style="text-align:center;">No priests found.</p>';
         return;
       }
@@ -232,21 +318,15 @@
       priests.forEach(priest => {
         const listItem = document.createElement('li');
         listItem.className = 'priest-item';
-
         const photoUrl = fixPhotoUrl(priest.photo);
         const nickname = priest.nickname ? priest.nickname.trim() : '';
-
-        let nicknameHTML = '';
-        if (nickname) {
-          nicknameHTML = `<p><strong>Nickname:</strong> ${nickname}</p>`;
-        }
-
+        const altText = priest.officialname ? `Priest: ${priest.officialname}` : 'Priest';
+        let nicknameHTML = nickname ? `<p><strong>Nickname:</strong> ${nickname}</p>` : '';
         listItem.innerHTML = `
-          <img src="${photoUrl}" alt="${priest.officialname || 'Priest'}" />
+          <img src="${photoUrl}" alt="${altText}" loading="lazy" />
           <h3>${priest.officialname || 'No Name'}</h3>
           ${nicknameHTML}
         `;
-
         priestListEl.appendChild(listItem);
       });
     }
@@ -260,67 +340,45 @@
       displayPriests(filtered);
     }
 
-    // Find priests added in latest year
     function findLatestYearPriests(priests) {
-      // Extract years from addedon fields
       const years = priests
         .map(p => p.addedon && p.addedon.trim().slice(0, 4))
         .filter(y => y && /^\d{4}$/.test(y))
         .map(Number);
-
-      if (years.length === 0) return { year: null, priests: [] };
-
+      if (!years.length) return { year: null, priests: [] };
       const maxYear = Math.max(...years);
       const latestPriests = priests.filter(p => p.addedon && p.addedon.startsWith(maxYear.toString()));
       return { year: maxYear, priests: latestPriests };
     }
 
-    function openModal() {
-      newPriestsModal.style.display = 'block';
-    }
+    function openModal() { newPriestsModal.style.display = 'block'; }
+    function closeModal() { newPriestsModal.style.display = 'none'; }
 
-    function closeModal() {
-      newPriestsModal.style.display = 'none';
-    }
-
-    // Populate the modal list with latest year priests
     function displayNewPriestsModal(priests) {
       newPriestsListEl.innerHTML = '';
-
-      if (priests.length === 0) {
+      if (!priests.length) {
         newPriestsListEl.innerHTML = '<p>No new priests added in the latest year.</p>';
         return;
       }
-
       priests.forEach(priest => {
         const li = document.createElement('li');
-
         const photoUrl = fixPhotoUrl(priest.photo);
         const nickname = priest.nickname ? priest.nickname.trim() : '';
-
-        let nicknameHTML = '';
-        if (nickname) {
-          nicknameHTML = `<p><strong>Nickname:</strong> ${nickname}</p>`;
-        }
-
+        const altText = priest.officialname ? `Priest: ${priest.officialname}` : 'Priest';
+        let nicknameHTML = nickname ? `<p><strong>Nickname:</strong> ${nickname}</p>` : '';
         li.innerHTML = `
-          <img src="${photoUrl}" alt="${priest.officialname || 'Priest'}" />
+          <img src="${photoUrl}" alt="${altText}" loading="lazy" />
           <h3>${priest.officialname || 'No Name'}</h3>
           ${nicknameHTML}
         `;
-
         newPriestsListEl.appendChild(li);
       });
     }
 
-    // Close modal on clicking outside content
     window.onclick = function(event) {
-      if (event.target === newPriestsModal) {
-        closeModal();
-      }
+      if (event.target === newPriestsModal) closeModal();
     };
 
-    // Event listeners
     newPriestsButton.addEventListener('click', () => {
       displayNewPriestsModal(latestYearPriests);
       openModal();
@@ -328,24 +386,18 @@
 
     modalCloseBtn.addEventListener('click', closeModal);
 
-    // Fetch data and initialize
     fetch(jsonUrl)
       .then(response => response.json())
       .then(data => {
         allPriests = data;
-
-        // Display all priests initially
         displayPriests(allPriests);
-
-        // Hide loading message
         loadingMessageEl.style.display = 'none';
 
-        // Find latest year and priests added in that year
         const { year, priests } = findLatestYearPriests(allPriests);
         latestYear = year;
         latestYearPriests = priests;
 
-        if (latestYear && latestYearPriests.length > 0) {
+        if (latestYear && latestYearPriests.length) {
           newPriestsCount.textContent = latestYearPriests.length;
           newPriestsButton.style.display = 'flex';
           newPriestsButton.title = `Show newly added priests from ${latestYear}`;
