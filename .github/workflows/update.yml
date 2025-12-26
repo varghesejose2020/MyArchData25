@@ -1,0 +1,24 @@
+name: Update Priests JSON
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # once per day
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Fetch data
+        run: |
+          curl -o priests.json https://www.archdiocesechanganacherry.org/index.php/welcome/getpriests
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add priests.json
+          git commit -m "Auto update priests data" || echo "No changes"
+          git push
