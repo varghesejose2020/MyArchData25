@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Archdiocese Changanacherry - Priests</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    #search-bar {
+      width: 100%;
+      padding: 10px;
+      margin: 20px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+
+    #priests-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .priest-item {
+      background-color: white;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      text-align: center;
+    }
+
+    .priest-item img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    .priest-item h3 {
+      margin: 10px 0 5px;
+      font-size: 1.3em;
+      color: #333;
+    }
+
+    .priest-item p {
+      margin: 5px 0;
+      color: #666;
+      font-size: 1em;
+    }
+
+    #loading-message {
+      text-align: center;
+      margin: 40px 0;
+    }
+
+    /* New Priests Button */
+    #new-priests-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1100;
+    }
+
+    #new-priests-count {
+      background-color: #ff4136;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 0.9em;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.6);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 1000px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .close-button {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close-button:hover {
+      color: black;
+    }
+
+    #new-priests-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #new-priests-list li {
+      background-color: #fafafa;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 10px;
+      text-align: center;
+    }
+
+    #new-priests-list img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    #new-priests-list h3 {
+      margin: 10px 0 5px;
+      font-size: 1.2em;
+      color: #222;
+    }
+
+    #new-priests-list p {
+      margin: 5px 0;
+      color: #444;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Priests of Archdiocese Changanacherry</h1>
+
+  <input
+    type="text"
+    id="search-bar"
+    placeholder="Search for a priest..."
+    oninput="filterPriests()"
+  />
+
+  <div id="loading-message">Loading...</div>
+  <ul id="priests-list"></ul>
+
+  <!-- New Priests Button -->
+  <button id="new-priests-button" style="display:none;" title="Show newly added priests">
+    Newly Added
+    <span id="new-priests-count">0</span>
+  </button>
+
+  <!-- Modal -->
+  <div id="new-priests-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" id="modal-close">&times;</span>
+      <h2>Newly Added Priests (Latest Year)</h2>
+      <ul id="new-priests-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    const jsonUrl = 'https://www.archdiocesechanganacherry.org/index.php/welcome/getpriests';
+    let allPriests = [];
+    let latestYearPriests = [];
+    let latestYear = null;
+
+    const priestListEl = document.getElementById('priests-list');
+    const loadingMessageEl = document.getElementById('loading-message');
+    const newPriestsButton = document.getElementById('new-priests-button');
+    const newPriestsCount = document.getElementById('new-priests-count');
+    const newPriestsModal = document.getElementById('new-priests-modal');
+    const newPriestsListEl = document.getElementById('new-priests-list');
+    const modalCloseBtn = document.getElementById('modal-close');
+
+    // Replace relative photo URLs with full URL if needed
+    function fixPhotoUrl(photoUrl) {
+      if (!photoUrl) return '';
+      if (photoUrl.startsWith('http')) return photoUrl;
+      // Remove leading "./" or any relative prefix
+      return photoUrl.replace(/^\.\/?/, 'https://directory.archdiocesechanganacherry.org/');
+    }
+
+    function displayPriests(priests) {
+      priestListEl.innerHTML = '';
+      if (priests.length === 0) {
+        priestListEl.innerHTML = '<p style="text-align:center;">No priests found.</p>';
+        return;
+      }
+
+      priests.forEach(priest => {
+        const listItem = document.createElement('li');
+        listItem.className = 'priest-item';
+
+        const photoUrl = fixPhotoUrl(priest.photo);
+        const nickname = priest.nickname ? priest.nickname.trim() : '';
+
+        let nicknameHTML = '';
+        if (nickname) {
+          nicknameHTML = `<p><strong>Nickname:</strong> ${nickname}</p>`;
+        }
+
+        listItem.innerHTML = `
+          <img src="${photoUrl}" alt="${priest.officialname || 'Priest'}" />
+          <h3>${priest.officialname || 'No Name'}</h3>
+          ${nicknameHTML}
+        `;
+
+        priestListEl.appendChild(listItem);
+      });
+    }
+
+    function filterPriests() {
+      const query = document.getElementById('search-bar').value.toLowerCase();
+      const filtered = allPriests.filter(priest =>
+        (priest.officialname && priest.officialname.toLowerCase().includes(query)) ||
+        (priest.nickname && priest.nickname.toLowerCase().includes(query))
+      );
+      displayPriests(filtered);
+    }
+
+    // Find priests added in latest year
+    function findLatestYearPriests(priests) {
+      // Extract years from addedon fields
+      const years = priests
+        .map(p => p.addedon && p.addedon.trim().slice(0, 4))
+        .filter(y => y && /^\d{4}$/.test(y))
+        .map(Number);
+
+      if (years.length === 0) return { year: null, priests: [] };
+
+      const maxYear = Math.max(...years);
+      const latestPriests = priests.filter(p => p.addedon && p.addedon.startsWith(maxYear.toString()));
+      return { year: maxYear, priests: latestPriests };
+    }
+
+    function openModal() {
+      newPriestsModal.style.display = 'block';
+    }
+
+    function closeModal() {
+      newPriestsModal.style.display = 'none';
+    }
+
+    // Populate the modal list with latest year priests
+    function displayNewPriestsModal(priests) {
+      newPriestsListEl.innerHTML = '';
+
+      if (priests.length === 0) {
+        newPriestsListEl.innerHTML = '<p>No new priests added in the latest year.</p>';
+        return;
+      }
+
+      priests.forEach(priest => {
+        const li = document.createElement('li');
+
+        const photoUrl = fixPhotoUrl(priest.photo);
+        const nickname = priest.nickname ? priest.nickname.trim() : '';
+
+        let nicknameHTML = '';
+        if (nickname) {
+          nicknameHTML = `<p><strong>Nickname:</strong> ${nickname}</p>`;
+        }
+
+        li.innerHTML = `
+          <img src="${photoUrl}" alt="${priest.officialname || 'Priest'}" />
+          <h3>${priest.officialname || 'No Name'}</h3>
+          ${nicknameHTML}
+        `;
+
+        newPriestsListEl.appendChild(li);
+      });
+    }
+
+    // Close modal on clicking outside content
+    window.onclick = function(event) {
+      if (event.target === newPriestsModal) {
+        closeModal();
+      }
+    };
+
+    // Event listeners
+    newPriestsButton.addEventListener('click', () => {
+      displayNewPriestsModal(latestYearPriests);
+      openModal();
+    });
+
+    modalCloseBtn.addEventListener('click', closeModal);
+
+    // Fetch data and initialize
+    fetch(jsonUrl)
+      .then(response => response.json())
+      .then(data => {
+        allPriests = data;
+
+        // Display all priests initially
+        displayPriests(allPriests);
+
+        // Hide loading message
+        loadingMessageEl.style.display = 'none';
+
+        // Find latest year and priests added in that year
+        const { year, priests } = findLatestYearPriests(allPriests);
+        latestYear = year;
+        latestYearPriests = priests;
+
+        if (latestYear && latestYearPriests.length > 0) {
+          newPriestsCount.textContent = latestYearPriests.length;
+          newPriestsButton.style.display = 'flex';
+          newPriestsButton.title = `Show newly added priests from ${latestYear}`;
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching priest data:', error);
+        loadingMessageEl.innerText = 'Failed to load data.';
+      });
+  </script>
+</body>
+</html>
