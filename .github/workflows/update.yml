@@ -1,3 +1,4 @@
+
 name: Update Priests JSON
 
 on:
@@ -5,15 +6,18 @@ on:
     - cron: '0 2 * * *'   # once per day
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Fetch data
         run: |
-          curl -o priests.json https://www.archdiocesechanganacherry.org/index.php/welcome/getpriests
+          curl -s -o priests.json https://www.archdiocesechanganacherry.org/index.php/welcome/getpriests
 
       - name: Commit changes
         run: |
